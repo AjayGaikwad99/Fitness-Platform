@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Gym • Shape Your Body</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    
+    :root {
+      --nav-height: 70px;
+      --primary: #ff6a00;
+      --primary-light: #ff8a33;
+      --overlay-dark: rgba(0, 0, 0, 0.6);
+      --text-light: #ffffff;
+      --font-main: 'Oswald', sans-serif;
+    }
+
+    
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-main);
+      color: var(--text-light);
+      background: #111;
+      scroll-behavior: smooth;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: var(--nav-height);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      transition: background 0.3s;
+    }
+    nav.scrolled { background: rgba(0,0,0,0.8); }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .menu {
+      display: flex;
+      gap: 2rem;
+      margin-left: auto;
+    }
+    .menu a {
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      transition: color 0.2s;
+    }
+    .menu a:hover { color: var(--primary-light); }
+
+    .nav-btn {
+      margin-left: 2rem;
+      padding: 0.6rem 1.5rem;
+      background: var(--primary);
+      border: none;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .nav-btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background-color: #000;
+      background-image: url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--overlay-dark);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      padding: 0 1.5rem;
+      animation: fadeInUp 1s ease-out forwards;
+      opacity: 0;
+    }
+    .eyebrow {
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      margin-bottom: 0.8rem;
+      text-transform: uppercase;
+    }
+    .headline {
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    }
+    .subhead {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: var(--primary);
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      transition: background 0.3s, transform 0.3s;
+    }
+    .btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-3px);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: #222;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+      color: #ddd;
+    }
+    .modal-content .close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .modal-content h2 {
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+    }
+    .modal-content label {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.4rem;
+      border: none;
+      border-radius: 4px;
+      background: #333;
+      color: #fff;
+    }
+    .modal-content .btn {
+      width: 100%;
+      margin-top: 1.5rem;
+    }
+
+    
+    @media (max-width: 768px) {
+      .headline { font-size: 3rem; }
+      .subhead { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <div class="logo">GYM</div>
+    <ul class="menu">
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="diet.html">Diet & Exercise Plan</a></li>
+      <li><a href="strength.html">Strength Checker</a></li>
+      <li><a href="supplements.html">Supplements</a></li>
+    </ul>
+    <a href="about.html" class="nav-btn">Learn More</a>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">Shape Your Body</div>
+      <h1 class="headline">Be Strong.</h1>
+      <h2 class="subhead">Train Hard.</h2>
+      <a href="user.html" class="btn">Live Coaching</a>
+    </div>
+  </section>
+
+  
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Stay in the Loop</h2>
+      <form id="modalForm">
+        <label for="email">Enter your email for updates:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="you@example.com"
+          required
+        />
+        <button type="submit" class="btn">Subscribe</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    
+    const openModal = document.getElementById('openModal');
+    const modal     = document.getElementById('modal');
+    const closeBtn  = modal.querySelector('.close');
+
+    openModal.addEventListener('click', () => modal.classList.add('active'));
+    closeBtn .addEventListener('click', () => modal.classList.remove('active'));
+    modal    .addEventListener('click', e => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+  </script>
+</body>
+</html>

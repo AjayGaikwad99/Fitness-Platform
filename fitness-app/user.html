@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find a Trainer | GoFit-999</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg,#e0eafc 0%,#cfdef3 100%);
+      margin: 0;
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #232a34;
+      color: #fff;
+      padding: 18px 0;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 10px rgba(44,62,80,0.09);
+    }
+    .container {
+      background: #fff;
+      max-width: 960px;
+      margin: 20px auto 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 28px rgba(44,62,80,0.13);
+      padding: 36px 24px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #232a34;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+    }
+
+    /* Search section */
+    .search-section {
+      display: none;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .search-section input {
+      padding: 10px;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #f8fafb;
+      width: 180px;
+    }
+    .search-section button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #2189ff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+    .search-section button:hover {
+      background: #1a6fcc;
+    }
+
+    .panel {
+      background: #f8fafb;
+      border: 1px solid #e5e5e5;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .panel button {
+      margin: 8px 6px;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .btn-dashboard { background: #2189ff; }
+    .btn-dashboard:hover { background: #1a6fcc; }
+    .btn-signout  { background: #e74c3c; }
+    .btn-signout:hover { background: #c0392b; }
+
+    .auth-btns {
+      display: flex;
+      gap: 14px;
+      margin-top: 14px;
+      margin-bottom: 10px;
+    }
+    .auth-btns button {
+      flex: 1;
+      padding: 10px 0;
+      font-size: 1rem;
+      border-radius: 5px;
+    }
+    label, input {
+      display: block;
+      width: 100%;
+    }
+    input {
+      margin-top: 7px;
+      padding: 10px;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #f8fafb;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #23c483;
+    }
+    .divider {
+      margin: 32px 0 22px;
+      border: none;
+      border-top: 1.5px dashed #e5e5e5;
+    }
+    #authMsg, #errorMsg {
+      color: #e74c3c;
+      text-align: center;
+      font-size: 0.97rem;
+      margin-top: 8px;
+    }
+    .trainer-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+    }
+    .trainer-card {
+      background: #f8fafb;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+      padding: 22px 18px;
+      width: 250px;
+      text-align: center;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .trainer-card:hover {
+      box-shadow: 0 6px 16px rgba(33,137,255,0.13);
+      transform: translateY(-2px) scale(1.03);
+    }
+    .trainer-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      border: 2.5px solid #23c483;
+      object-fit: cover; margin-bottom: 14px;
+      background: #e8eaea;
+    }
+    .trainer-name {
+      font-size: 1.15rem;
+      font-weight: bold;
+      color: #232a34;
+      margin-bottom: 5px;
+    }
+    .trainer-field {
+      margin: 2px 0;
+      font-size: 0.98rem;
+      color: #2189ff;
+      font-weight: 500;
+    }
+    .trainer-bio {
+      color: #4b4b4b;
+      font-size: 0.98rem;
+      margin: 6px 0;
+      min-height: 40px;
+    }
+    .trainer-rate {
+      color: #23c483;
+      font-size: 1.07rem;
+      margin-top: 7px;
+      font-weight: 500;
+    }
+    .hire-btn {
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: #23c483;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .hire-btn:hover {
+      background: #2189ff;
+    }
+
+    @media (max-width: 700px) {
+      .container  { padding: 24px 16px; }
+      .trainer-card { width: 88vw; }
+      .search-section { flex-direction: column; align-items: stretch; }
+      .search-section input { width: 100%; }
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="navbar">GoFit Trainers Network</div>
+
+  <div class="container">
+    <h2>Find Your Trainer</h2>
+
+    <!-- Signed‐in panel -->
+    <div id="signedInPanel" class="panel" style="display:none;">
+      <p>Signed in as <strong><span id="userEmail"></span></strong></p>
+      <button class="btn-dashboard" id="userDashboardBtn">My Dashboard</button>
+      <button class="btn-signout"    id="signOutBtn">Sign Out</button>
+    </div>
+
+    <!-- Auth section -->
+    <div id="authSection">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Email" required>
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Password" required>
+      <div class="auth-btns">
+        <button type="button" id="signupBtn">Sign Up</button>
+        <button type="button" id="signinBtn">Sign In</button>
+      </div>
+      <div id="authMsg"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Search section -->
+    <div class="search-section" id="searchSection">
+      <input type="text"   id="searchName"  placeholder="Search by name">
+      <input type="number" id="searchPrice" placeholder="Max price (₹)">
+      <button id="searchBtn">Search</button>
+      <button id="clearSearchBtn">Clear</button>
+    </div>
+
+    <div id="errorMsg"></div>
+    <div class="trainer-list" id="trainerList"></div>
+  </div>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQwqNuIDSbaUfH_N6sy1fVZ1sZKHgbpwc",
+      authDomain: "gofit-999.firebaseapp.com",
+      projectId: "gofit-999",
+      storageBucket: "gofit-999.appspot.com",
+      messagingSenderId: "655870780801",
+      appId: "1:655870780801:web:292d28dbca3e6e00b9b480"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
+    const signedInPanel    = document.getElementById('signedInPanel');
+    const userEmailSpan    = document.getElementById('userEmail');
+    const userDashboardBtn = document.getElementById('userDashboardBtn');
+    const signOutBtn       = document.getElementById('signOutBtn');
+    const authSection      = document.getElementById('authSection');
+    const authMsg          = document.getElementById('authMsg');
+    const errorMsg         = document.getElementById('errorMsg');
+    const trainerList      = document.getElementById('trainerList');
+    const searchSection    = document.getElementById('searchSection');
+    const searchName       = document.getElementById('searchName');
+    const searchPrice      = document.getElementById('searchPrice');
+    const searchBtn        = document.getElementById('searchBtn');
+    const clearSearchBtn   = document.getElementById('clearSearchBtn');
+
+    let allTrainers = [];
+
+    // Auth state listener
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userEmailSpan.textContent  = user.email;
+        signedInPanel.style.display = 'block';
+        authSection.style.display   = 'none';
+        searchSection.style.display = 'flex';
+        loadTrainers();
+      } else {
+        signedInPanel.style.display = 'none';
+        authSection.style.display   = 'block';
+        searchSection.style.display = 'none';
+        trainerList.innerHTML       = '';
+      }
+    });
+
+    // Sign up
+    signupBtn.onclick = async () => {
+      authMsg.textContent = '';
+      try {
+        await auth.createUserWithEmailAndPassword(
+          email.value.trim(), password.value
+        );
+        authMsg.textContent = 'Signed up & logged in!';
+        authMsg.style.color = '#23c483';
+      } catch (e) {
+        authMsg.textContent = e.message;
+        authMsg.style.color = '#e74c3c';
+      }
+    };
+
+    // Sign in
+    signinBtn.onclick = async () => {
+      authMsg.textContent = '';
+      try {
+        await auth.signInWithEmailAndPassword(
+          email.value.trim(), password.value
+        );
+        authMsg.textContent = 'Successfully signed in!';
+        authMsg.style.color = '#23c483';
+      } catch (e) {
+        authMsg.textContent = e.message;
+        authMsg.style.color = '#e74c3c';
+      }
+    };
+
+    // Sign out
+    signOutBtn.onclick = () => auth.signOut();
+
+    // Go to user dashboard
+    userDashboardBtn.onclick = () => {
+      window.location.href = 'userdashboard.html';
+    };
+
+    // Load all trainers from Firestore once
+    async function loadTrainers() {
+      errorMsg.textContent = '';
+      trainerList.innerHTML = '';
+      allTrainers = [];
+
+      try {
+        const snapshot = await db.collection('trainers').get();
+        if (snapshot.empty) {
+          trainerList.innerHTML = '<p>No trainers found.</p>';
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          allTrainers.push({
+            id: doc.id,
+            name: data.name.toLowerCase(),
+            rate: data.rate,
+            photoURL: data.photoURL,
+            specialty: data.specialty,
+            bio: data.bio
+          });
+        });
+
+        displayTrainers(allTrainers);
+      } catch (err) {
+        console.error(err);
+        errorMsg.textContent = 'Failed to load trainers: ' + err.message;
+      }
+    }
+
+    // Render a list of trainer objects
+    function displayTrainers(list) {
+      trainerList.innerHTML = '';
+      if (list.length === 0) {
+        trainerList.innerHTML = '<p>No trainers match your search.</p>';
+        return;
+      }
+      list.forEach(tr => {
+        const card = document.createElement('div');
+        card.className = 'trainer-card';
+        card.innerHTML = `
+          <img class="trainer-avatar" src="${tr.photoURL || 'https://via.placeholder.com/72'}" alt="avatar">
+          <div class="trainer-name">${tr.name}</div>
+          <div class="trainer-field">${tr.specialty}</div>
+          <div class="trainer-bio">${tr.bio}</div>
+          <div class="trainer-rate">₹${tr.rate}/session</div>
+          <button class="hire-btn" data-id="${tr.id}" data-rate="${tr.rate}">
+            Hire
+          </button>
+        `;
+        trainerList.appendChild(card);
+      });
+
+      // attach hire listeners
+      document.querySelectorAll('.hire-btn').forEach(btn => {
+        btn.onclick = async e => {
+          const trainerId = e.target.dataset.id;
+          const rate      = parseFloat(e.target.dataset.rate);
+          if (!confirm(`Hire this trainer for ₹${rate}?`)) return;
+          try {
+            await db
+              .collection('users')
+              .doc(auth.currentUser.uid)
+              .collection('hires')
+              .doc(trainerId)
+              .set({
+                trainerId,
+                rate,
+                hiredAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            alert('Trainer hired successfully!');
+          } catch (err) {
+            console.error(err);
+            errorMsg.textContent = 'Error hiring trainer: ' + err.message;
+          }
+        };
+      });
+    }
+
+    // Filter logic
+    function filterTrainers() {
+      const nameFilter = searchName.value.trim().toLowerCase();
+      const priceFilter = parseFloat(searchPrice.value);
+      const filtered = allTrainers.filter(tr => {
+        const matchesName = !nameFilter || tr.name.includes(nameFilter);
+        const matchesPrice = isNaN(priceFilter) || tr.rate <= priceFilter;
+        return matchesName && matchesPrice;
+      });
+      displayTrainers(filtered);
+    }
+
+    // Search button
+    searchBtn.onclick = filterTrainers;
+    clearSearchBtn.onclick = () => {
+      searchName.value = '';
+      searchPrice.value = '';
+      displayTrainers(allTrainers);
+    };
+
+    // Also filter on Enter key
+    [searchName, searchPrice].forEach(el => {
+      el.addEventListener('keyup', e => {
+        if (e.key === 'Enter') filterTrainers();
+      });
+    });
+  </script>
+</body>
+</html>

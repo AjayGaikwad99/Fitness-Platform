@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trainer Dashboard | GoFit-999</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg,#e0eafc 0%,#cfdef3 100%);
+      margin: 0;
+      min-height: 100vh;
+    }
+    .navbar {
+      background: #232a34;
+      color: #fff;
+      padding: 18px;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 10px rgba(44,62,80,0.09);
+    }
+    .container {
+      background: #fff;
+      max-width: 960px;
+      margin: 20px auto;
+      padding: 36px 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 28px rgba(44,62,80,0.13);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #232a34;
+      font-size: 1.8rem;
+    }
+    #errorMsg {
+      color: #e74c3c;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .appt-card {
+      background: #f8fafb;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .card-header .user {
+      font-weight: bold;
+      color: #232a34;
+    }
+    .status {
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    .pending   { background: #e67e22; }
+    .scheduled { background: #23c483; }
+    .declined  { background: #e74c3c; }
+    .detail {
+      margin-bottom: 12px;
+      color: #4b4b4b;
+    }
+    .datetime-input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+    }
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-right: 8px;
+      transition: background 0.2s;
+    }
+    .btn-schedule { background: #23c483; color: #fff; }
+    .btn-schedule:hover { background: #1fa76d; }
+    .btn-decline  { background: #e74c3c; color: #fff; }
+    .btn-decline:hover { background: #c0392b; }
+    .btn-live     { background: #2189ff; color: #fff; }
+    .btn-live:hover { background: #1a6fcc; }
+    .btn-message  { background: #28a745; color: #fff; }
+    .btn-message:hover { background: #218838; }
+    @media (max-width: 700px) {
+      .container { padding: 24px 16px; }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="navbar">Trainer Dashboard</div>
+  <div class="container">
+    <h2>Client Sessions & Payments</h2>
+    <div id="errorMsg"></div>
+    <div id="appointments"></div>
+  </div>
+
+  <script>
+    // 1) Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQwqNuIDSbaUfH_N6sy1fVZ1sZKHgbpwc",
+      authDomain: "gofit-999.firebaseapp.com",
+      projectId: "gofit-999",
+      storageBucket: "gofit-999.appspot.com",
+      messagingSenderId: "655870780801",
+      appId: "1:655870780801:web:292d28dbca3e6e00b9b480"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    const list = document.getElementById('appointments');
+    const err  = document.getElementById('errorMsg');
+
+    // 2) Wait for trainer to sign in
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = 'trainer.html';
+        return;
+      }
+      await loadAppointments(user.uid);
+    });
+
+    // 3) Load appointments once with .get()
+    async function loadAppointments(trainerUid) {
+      try {
+        list.innerHTML = '';
+        err.textContent = '';
+
+        const snapshot = await db.collection('appointments')
+          .where('trainerId', '==', trainerUid)
+          .orderBy('requestedAt', 'desc')
+          .get();
+
+        if (snapshot.empty) {
+          list.innerHTML = '<p style="text-align:center;">No sessions booked.</p>';
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          const card = document.createElement('div');
+          card.className = 'appt-card';
+
+          card.innerHTML = `
+            <div class="card-header">
+              <div class="user">${d.userName} (${d.userEmail})</div>
+              <div class="status ${d.status}">${d.status.toUpperCase()}</div>
+            </div>
+            <div class="detail">
+              Requested: ${new Date(d.requestedAt.toDate()).toLocaleString()}
+            </div>
+          `;
+
+          // If still pending: allow scheduling or declining
+          if (d.status === 'pending') {
+            const dtInput = document.createElement('input');
+            dtInput.type = 'datetime-local';
+            dtInput.className = 'datetime-input';
+            // default: tomorrow at 9:00
+            const t = new Date();
+            t.setDate(t.getDate()+1);
+            t.setHours(9,0,0,0);
+            dtInput.value = t.toISOString().slice(0,16);
+            card.appendChild(dtInput);
+
+            const btnSch = document.createElement('button');
+            btnSch.className = 'btn btn-schedule';
+            btnSch.textContent = 'Schedule Session';
+            btnSch.onclick = async () => {
+              if (!dtInput.value) {
+                alert('Please pick a date & time.');
+                return;
+              }
+              const scheduledAt = firebase.firestore.Timestamp.fromDate(new Date(dtInput.value));
+              const liveUrl = `https://meet.jit.si/GoFit-${doc.id}`;
+              await db.collection('appointments').doc(doc.id).update({
+                status: 'scheduled',
+                scheduledAt,
+                liveUrl
+              });
+              alert('Session scheduled!');
+              loadAppointments(trainerUid);
+            };
+            card.appendChild(btnSch);
+
+            const btnDec = document.createElement('button');
+            btnDec.className = 'btn btn-decline';
+            btnDec.textContent = 'Decline';
+            btnDec.onclick = async () => {
+              await db.collection('appointments').doc(doc.id).update({ status: 'declined' });
+              alert('Request declined.');
+              loadAppointments(trainerUid);
+            };
+            card.appendChild(btnDec);
+          }
+
+          // If already scheduled: show time and live link
+          if (d.status === 'scheduled' && d.scheduledAt) {
+            const schedDiv = document.createElement('div');
+            schedDiv.className = 'detail';
+            schedDiv.innerHTML = `<strong>Scheduled:</strong> ${new Date(d.scheduledAt.toDate()).toLocaleString()}`;
+            card.appendChild(schedDiv);
+
+            const btnLive = document.createElement('button');
+            btnLive.className = 'btn btn-live';
+            btnLive.textContent = 'Start Live Coaching';
+            btnLive.onclick = () => window.open(d.liveUrl, '_blank');
+            card.appendChild(btnLive);
+          }
+
+          // Always show Message User button
+          const btnMsg = document.createElement('button');
+          btnMsg.className = 'btn btn-message';
+          btnMsg.textContent = 'Message User';
+          btnMsg.onclick = () => {
+            window.location.href = `trainer-message.html?userId=${encodeURIComponent(d.userId)}`;
+          };
+          card.appendChild(btnMsg);
+
+          list.appendChild(card);
+        });
+      } catch (e) {
+        console.error(e);
+        err.textContent = 'Error: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>From Skinny to Strong</title>
+  <style>
+    /* Reset & basics */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; }
+
+    /* Background */
+    body {
+      background: url('https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=1950&q=80')
+                  center/cover no-repeat;
+      color: #fff;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+      position: relative;
+    }
+
+    /* Fullscreen “Tap to Listen” overlay */
+    #overlay {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex; justify-content: center; align-items: center;
+      text-align: center; padding: 2rem;
+      cursor: pointer; z-index: 9999;
+      color: #fff;
+    }
+    #overlay h2 { font-size: 2rem; margin-bottom: .5rem; }
+    #overlay p  { font-size: 1rem; opacity: .8; }
+
+    /* Centered splash content */
+    .container {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center; opacity: 0;
+      animation: fadeIn 1.5s forwards 0.5s;
+    }
+    h1 {
+      font-size: 3rem; margin-bottom: 1rem;
+      animation: pulse 2s infinite; transform-origin: center;
+    }
+    p {
+      font-size: 1.25rem; margin-bottom: 2rem;
+      opacity: 0; animation: fadeIn 2s forwards 1.5s;
+    }
+    .boost-btn {
+      padding: .8rem 2rem; font-size: 1.1rem;
+      background: #ffdd00; color: #222;
+      border: none; border-radius: 4px; cursor: pointer;
+      transition: transform .2s, background .2s;
+    }
+    .boost-btn:hover {
+      background: #ffc400; transform: scale(1.05);
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.1); }
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <!-- Hidden audio: will play on first tap -->
+  <audio id="bg-music" loop preload="auto">
+    <source
+      src="C:\Users\Ajay\Downloads\safe_and_sound.mp3"
+      type="audio/mpeg">
+    Your browser does not support audio.
+  </audio>
+
+  <!-- Overlay forcing a user gesture -->
+  <div id="overlay">
+    <div>
+      <h2>Tap Anywhere to Boost yourself</h2>
+      <p>Then click “Boost Me!” to continue</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>From Weak to Strong</h1>
+    <p>“Transformation starts when you decide to change.”</p>
+    <button class="boost-btn">Boost Me!</button>
+  </div>
+
+  <script>
+    const audio   = document.getElementById('bg-music');
+    const overlay = document.getElementById('overlay');
+    const btn     = document.querySelector('.boost-btn');
+
+    // 1) Start audio on first tap
+    overlay.addEventListener('click', () => {
+      audio.play().catch(console.error);
+      overlay.style.transition = 'opacity 0.5s';
+      overlay.style.opacity = 0;
+      setTimeout(() => overlay.remove(), 500);
+    });
+
+    // 2) Redirect on Boost Me!
+    btn.addEventListener('click', () => {
+      window.location.href = 'register.html';
+    });
+  </script>
+</body>
+</html>

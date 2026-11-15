@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gym Portal Login</title>
+  <link
+    href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
+
+  <style>
+    :root {
+      --bg-img: url('https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg');
+      --clr-primary: #ffdd57;
+      --clr-secondary: #ff8c00;
+      --clr-text: #fff;
+      --clr-text-muted: rgba(255,255,255,0.6);
+      --radius: 12px;
+      --speed: .3s;
+      --tab-count: 2;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Montserrat', sans-serif; }
+    body {
+      background: var(--bg-img) center/cover no-repeat fixed;
+      display: grid; place-items: center;
+      color: var(--clr-text); overflow: hidden;
+      animation: bgZoom 30s ease-in-out infinite;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(45deg, rgba(0,0,0,0.7), rgba(0,0,0,0.4));
+      z-index: 0;
+    }
+    @keyframes bgZoom {
+      0%,100% { transform: scale(1); }
+      50%       { transform: scale(1.1); }
+    }
+    .login-card {
+      position: relative; z-index: 1;
+      width: 360px; max-width: 90%;
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .tabs {
+      display: flex; position: relative; --active: 0;
+      margin-bottom: 1rem;
+    }
+    .tabs button {
+      flex: 1; padding: 1rem 0;
+      background: transparent; border: none;
+      color: var(--clr-text-muted);
+      font-weight: 600; cursor: pointer;
+      transition: color var(--speed);
+    }
+    .tabs button.active { color: var(--clr-primary); }
+    .tabs::after {
+      content: '';
+      position: absolute; bottom: 0;
+      height: 3px; width: calc(100%/var(--tab-count));
+      background: var(--clr-primary);
+      left: calc(var(--active)*(100%/var(--tab-count)));
+      transition: left var(--speed) ease-in-out;
+    }
+    .form-panel {
+      padding: 2rem;
+      transform: translateX(100%); opacity: 0;
+      transition: transform var(--speed), opacity var(--speed);
+      position: absolute; width: 100%; left: 0; top: 0;
+    }
+    .form-panel.active {
+      transform: translateX(0); opacity: 1;
+      position: relative;
+    }
+    .input-group {
+      position: relative; margin-bottom: 1.5rem;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      background: rgba(255,255,255,0.15);
+      border: none; border-radius: var(--radius);
+      color: var(--clr-text);
+      transition: background var(--speed), box-shadow var(--speed);
+    }
+    .input-group i {
+      position: absolute; left: 1rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--clr-text-muted); font-size: 1.1rem;
+    }
+    .input-group label {
+      position: absolute; left: 3rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--clr-text-muted);
+      pointer-events: none;
+      transition: transform .2s, font-size .2s;
+    }
+    .input-group input:focus,
+    .input-group input:not(:placeholder-shown) {
+      background: rgba(255,255,255,0.3);
+      box-shadow: 0 0 0 2px var(--clr-primary);
+    }
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+      transform: translateY(-150%);
+      font-size: .75rem;
+      color: var(--clr-primary);
+    }
+    .btn {
+      width: 100%; padding: .85rem;
+      background: linear-gradient(135deg, var(--clr-secondary), var(--clr-primary));
+      color: #333; font-weight: 700;
+      border: none; border-radius: var(--radius);
+      cursor: pointer;
+      transition: transform var(--speed), box-shadow var(--speed);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+    }
+    .bottom-links {
+      display: flex; justify-content: space-between;
+      color: var(--clr-text-muted);
+      font-size: .85rem; margin: .5rem 0 1.5rem;
+    }
+    .bottom-links a { color: var(--clr-primary); text-decoration: none; }
+    .social-login {
+      text-align: center; color: var(--clr-text-muted);
+      font-size: .85rem; margin-bottom: .75rem;
+    }
+    .social-icons {
+      display: flex; justify-content: center; gap: 1rem;
+    }
+    .social-icons i {
+      font-size: 1.3rem; cursor: pointer;
+      color: var(--clr-text-muted);
+      transition: color var(--speed);
+    }
+    .social-icons i:hover { color: var(--clr-primary); }
+    footer {
+      position: fixed; bottom: 1rem; width: 100%;
+      text-align: center; font-size: .85rem; z-index: 1;
+    }
+    footer a {
+      color: var(--clr-primary);
+      margin: 0 .5rem;
+      text-decoration: none;
+    }
+    footer a:hover { color: var(--clr-secondary); }
+    .messageDiv {
+      background-color: hsl(327, 90%, 28%);
+      color: white;
+      padding: 10px 20px;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      display: none;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-card">
+    <div class="tabs" id="tabs">
+      <button data-target="user" class="active">User</button>
+      <button data-target="trainer">Trainer</button>
+    </div>
+
+    <!-- User Form -->
+    <div id="user" class="form-panel active">
+      <p class="quote">“The only bad workout is the one that didn’t happen.”</p>
+      <form id="userForm">
+        <div id="signInMessage" class="messageDiv"></div>
+
+        <div class="input-group">
+          <input
+            type="text"
+            id="email"
+            name="identifier"
+            placeholder=" "
+            required
+          />
+          <label for="email">Email or Phone</label>
+          <i class="fas fa-envelope"></i>
+        </div>
+
+        <div class="input-group">
+          <input
+            type="password"
+            id="pwd1"
+            name="password"
+            placeholder=" "
+            required
+          />
+          <label for="pwd1">Password</label>
+          <i class="fas fa-lock"></i>
+        </div>
+
+        <div class="bottom-links">
+          <label><input type="checkbox" /> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button type="submit" id="userLoginBtn" class="btn">Log In</button>
+
+        <div class="social-login">Or connect with</div>
+        <div class="social-icons">
+          <i class="fab fa-google"></i>
+          <i class="fab fa-facebook-f"></i>
+          <i class="fab fa-twitter"></i>
+        </div>
+      </form>
+    </div>
+
+    <!-- Trainer Form -->
+    <div id="trainer" class="form-panel">
+      <p class="quote">“Push yourself, because no one else is going to do it for you.”</p>
+      <form id="trainerForm">
+        <div id="trainerMessage" class="messageDiv"></div>
+
+        <div class="input-group">
+          <input
+            type="text"
+            id="usern"
+            name="identifier"
+            placeholder=" "
+            required
+          />
+          <label for="usern">Username</label>
+          <i class="fas fa-user-tie"></i>
+        </div>
+
+        <div class="input-group">
+          <input
+            type="password"
+            id="pwd2"
+            name="password"
+            placeholder=" "
+            required
+          />
+          <label for="pwd2">Password</label>
+          <i class="fas fa-lock"></i>
+        </div>
+
+        <div class="bottom-links">
+          <label><input type="checkbox" /> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button type="submit" id="trainerLoginBtn" class="btn">Log In</button>
+
+        <div class="social-login">Or connect with</div>
+        <div class="social-icons">
+          <i class="fab fa-linkedin-in"></i>
+          <i class="fab fa-instagram"></i>
+          <i class="fab fa-github"></i>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <a href="#">Privacy &amp; Terms</a> |
+    <a href="#">Contact Us</a>
+  </footer>
+
+  <!-- Tab switcher -->
+  <script>
+    const tabs = document.getElementById('tabs');
+    document.querySelectorAll('.tabs button').forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.target).classList.add('active');
+        tabs.style.setProperty('--active', i);
+      });
+    });
+  </script>
+
+  <!-- Firebase Auth -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+    
+
+    // TODO: Replace with your Firebase project config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQwqNuIDSbaUfH_N6sy1fVZ1sZKHgbpwc",
+  authDomain: "gofit-999.firebaseapp.com",
+  projectId: "gofit-999",
+      // ...other keys...
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    function showMessage(elId, msg) {
+      const div = document.getElementById(elId);
+      div.textContent = msg;
+      div.style.display = 'block';
+    }
+
+    // User login
+    document.getElementById('userForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = e.target;
+      const email    = form.identifier.value.trim();
+      const password = form.password.value.trim();
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = 'boost.html';
+      } catch (err) {
+        showMessage('signInMessage', err.message);
+      }
+    });
+
+    // Trainer login
+    document.getElementById('trainerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = e.target;
+      const usern   = form.identifier.value.trim();
+      const pwd     = form.password.value.trim();
+      try {
+        await signInWithEmailAndPassword(auth, usern, pwd);
+        window.location.href = 'trainer.html';
+      } catch (err) {
+        showMessage('trainerMessage', err.message);
+      }
+    });
+  </script>
+</body>
+</html>

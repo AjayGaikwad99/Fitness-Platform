@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>GOFIT 99 – Supplements Catalog</title>
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" 
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg-img: url("https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=1170&q=80");
+      --overlay: rgba(0,0,0,0.6);
+      --primary: #ff8c00;
+      --primary2: #ff6200;
+      --card-bg: rgba(255,255,255,0.9);
+      --text: #333;
+      --shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    * { margin:0; padding:0; box-sizing:border-box }
+    body {
+      font-family:'Montserrat',sans-serif;
+      background: var(--bg-img) center/cover fixed;
+      color: var(--text);
+      position: relative;
+      min-height: 100vh;
+    }
+    body::before {
+      content:""; position:absolute; inset:0;
+      background: var(--overlay); z-index:0;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 2;
+      background: var(--card-bg);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem; box-shadow: var(--shadow);
+    }
+    nav .brand {
+      font-size: 1.5rem; font-weight: 600;
+      color: var(--primary);
+    }
+    nav #nav-greet {
+      font-weight: 500;
+    }
+    main {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 {
+      text-align: center; margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+    .supplements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .supp-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .3s;
+    }
+    .supp-card:hover {
+      transform: translateY(-6px);
+    }
+    .supp-card header {
+      padding: 1rem 1.5rem;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .supp-card section {
+      padding: 1.5rem;
+      flex: 1;
+      font-size: .95rem;
+      line-height: 1.4;
+    }
+    .supp-card footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #eee;
+      text-align: right;
+    }
+    .supp-card footer a {
+      background: var(--primary2);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: .6rem 1.2rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .3s;
+    }
+    .supp-card footer a:hover {
+      background: var(--primary);
+    }
+    .back-link {
+      display: block;
+      margin: 2rem auto 1rem;
+      text-align: center;
+      font-size: .95rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .back-link:hover {
+      color: var(--primary2);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="brand">GOFIT 99</div>
+    <div id="nav-greet">Loading…</div>
+  </nav>
+
+  <main>
+    <h1>Supplements Catalog</h1>
+    <div class="supplements-grid">
+
+      <div class="supp-card">
+        <header>Muscle Blez</header>
+        <section>
+          High-quality protein and recovery formulas to fuel muscle growth and repair.
+        </section>
+        <footer>
+          <a href="https://www.muscleblaze.com" target="_blank">Go to Site</a>
+        </footer>
+      </div>
+
+      <div class="supp-card">
+        <header>Wellcore</header>
+        <section>
+          Science-backed vitamins, minerals, and blends for overall health and performance.
+        </section>
+        <footer>
+          <a href="https://wellversed.in/" target="_blank">Go to Site</a>
+        </footer>
+      </div>
+
+      <div class="supp-card">
+        <header>Big Muscles</header>
+        <section>
+          Premium mass gainers and pre-workout supplements to take your training further.
+        </section>
+        <footer>
+          <a href="https://www.bigmusclesnutrition.com/" target="_blank">Go to Site</a>
+        </footer>
+      </div>
+
+      <!-- add more cards as needed -->
+    </div>
+
+    <a href="boost.html" class="back-link">← Back to Dashboard</a>
+  </main>
+
+  <script>
+    // greet user by name from localStorage
+    const KEY = 'user_profile';
+    const profile = JSON.parse(localStorage.getItem(KEY) || 'null') || { name: 'Athlete' };
+    document.getElementById('nav-greet').textContent = `Hi, ${profile.name}`;
+  </script>
+</body>
+</html>

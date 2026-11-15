@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GOFIT 99 – Full Workout & Diet Plan</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <style>
+    :root {
+      --bg-img: url("https://images.unsplash.com/photo-1554284126-41e6c5029898?auto=format&fit=crop&w=1170&q=80");
+      --overlay: rgba(0,0,0,0.6);
+      --primary: #ff8c00;
+      --secondary: #ff6200;
+      --card-bg: rgba(255,255,255,0.95);
+      --text: #333;
+      --shadow: 0 8px 20px rgba(0,0,0,0.2);
+      --radius: 12px;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+    html, body {
+      height: 100%; font-family: "Montserrat", sans-serif;
+    }
+    body {
+      background: var(--bg-img) center/cover fixed;
+      position: relative; color: var(--text);
+    }
+    body::before {
+      content: ""; position: absolute; inset: 0;
+      background: var(--overlay); z-index: 0;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 2;
+      background: var(--card-bg);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem; box-shadow: var(--shadow);
+    }
+    nav .brand {
+      font-size: 1.5rem; font-weight: 600; color: var(--primary);
+    }
+    nav #nav-greet { font-weight: 500; }
+
+    main {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 2rem auto; padding: 0 1rem;
+    }
+    h1 {
+      text-align: center; margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    .instructions {
+      background: var(--secondary);
+      color: #fff; padding: 1rem 1.5rem;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+    .instructions h2 { font-size: 1.2rem; margin-bottom: .5rem; }
+    .instructions ol { padding-left: 1.2rem; }
+    .instructions ol li { margin-bottom: .5rem; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem; overflow: hidden;
+    }
+    .card-header {
+      background: var(--primary);
+      color: #fff; padding: 1rem 1.5rem;
+      font-size: 1.25rem; font-weight: 600;
+    }
+    .card-body { padding: 1.5rem; }
+
+    .macros {
+      display: flex; gap: 2rem;
+      justify-content: space-around; align-items: center;
+      margin-bottom: .5rem;
+    }
+    .macros div { text-align: center; }
+    .macros i { color: var(--primary); margin-right: .3rem; }
+    .macros strong {
+      display: block; font-size: 1.5rem; color: var(--secondary);
+    }
+    .training-guidelines {
+      text-align: center; font-size: .95rem;
+      color: var(--text); margin-bottom: 1rem;
+    }
+    .weekly-progress {
+      text-align: center; margin-top: 1rem;
+    }
+    .weekly-progress span {
+      display: block; margin-bottom: .5rem;
+    }
+    .weekly-progress progress {
+      width: 80%; height: 10px; border: none;
+      border-radius: 5px; overflow: hidden;
+    }
+
+    table {
+      width: 100%; border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+    th, td {
+      padding: .75rem 1rem; border: 1px solid #eee;
+      text-align: left; font-size: .95rem;
+    }
+    th {
+      background: var(--primary); color: #fff;
+      font-weight: 600;
+    }
+    td { background: #fafafa; }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .day-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column;
+    }
+    .day-card header {
+      background: var(--secondary);
+      color: #fff; padding: .75rem 1rem;
+      font-weight: 600; font-size: 1rem;
+    }
+    .day-body {
+      padding: 1rem; display: flex;
+      flex-direction: column; gap: .75rem;
+      font-size: .95rem;
+    }
+    .day-body label {
+      display: flex; align-items: center; gap: .5rem;
+      cursor: pointer;
+    }
+    .day-body input[type="checkbox"] {
+      width: 18px; height: 18px; cursor: pointer;
+    }
+
+    #complete-week {
+      display: block; margin: 2rem auto; padding: .75rem 1.5rem;
+      background: var(--secondary); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-size: 1rem; font-weight: 600;
+      cursor: not-allowed; opacity: .6;
+      transition: opacity .3s, cursor .3s;
+    }
+    #complete-week.enabled {
+      cursor: pointer; opacity: 1;
+    }
+
+    /* celebration overlay */
+    #celebrate {
+      position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 10; visibility: hidden; opacity: 0;
+      transition: opacity .3s;
+    }
+    #celebrate.visible {
+      visibility: visible; opacity: 1;
+    }
+    #celebrate lottie-player {
+      width: 250px; height: 250px;
+    }
+    #celebrate .message {
+      margin-top: 1rem;
+      font-size: 2rem; font-weight: 700;
+      color: var(--secondary);
+      animation: bounce 1s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-15px) scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">GOFIT 99</div>
+    <div id="nav-greet">Hi, Athlete</div>
+  </nav>
+
+  <main>
+    <h1>Full Workout & Diet Plan</h1>
+
+    <div class="instructions">
+      <h2>How to use:</h2>
+      <ol>
+        <li>Review your daily macros & calorie target.</li>
+        <li>Tap “Done workout” after each session.</li>
+        <li>Tick each meal when you finish eating.</li>
+        <li>Track your weekly progress below.</li>
+        <li>Once you complete everything, celebrate! 🎉</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Your Daily Targets</div>
+      <div class="card-body">
+        <div class="macros">
+          <div><i class="fa-solid fa-fire"></i><strong id="cal-info">—</strong> kcal</div>
+          <div><i class="fa-solid fa-bone"></i><strong id="protein-info">—</strong> g Protein</div>
+          <div><i class="fa-solid fa-droplet"></i><strong id="fat-info">—</strong> g Fat</div>
+          <div><i class="fa-solid fa-grain"></i><strong id="carb-info">—</strong> g Carbs</div>
+        </div>
+        <div class="training-guidelines">
+          Aim for 5+ workouts/week, 45–60 minutes each
+        </div>
+        <div class="weekly-progress">
+          <span>Workouts Done: <strong id="workout-count">0</strong>/7</span>
+          <progress id="week-progress" max="7" value="0"></progress>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Weekly Overview</div>
+      <div class="card-body">
+        <table>
+          <thead><tr><th>Day</th><th>Workout</th><th>Meals</th></tr></thead>
+          <tbody id="overview-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="days-grid" id="days-grid"></div>
+    <button id="complete-week">Complete Week</button>
+  </main>
+
+  <!-- celebration overlay -->
+  <div id="celebrate">
+    <lottie-player
+      background="transparent"
+      speed="1"
+      autoplay
+      loop
+    ></lottie-player>
+    <div class="message">🥷🎉 Congratulations! Stay consistent! 🎉🥷</div>
+  </div>
+
+  <script>
+    const stored = JSON.parse(localStorage.getItem("user_profile") || "{}");
+    const params = new URLSearchParams(window.location.search);
+    const name   = stored.name || "Athlete";
+    const weight = parseFloat(params.get("weight")) || stored.weight || 0;
+    const goal   = (params.get("goal") || stored.goal || "lose").toLowerCase();
+
+    document.getElementById("nav-greet").textContent = `Hi, ${name}`;
+
+    // calculate macros
+    const factor = goal === "lose" ? 0.8 : 1.2;
+    const cals   = Math.round(weight * 22 * factor);
+    const prot   = Math.round(weight * 2);
+    const fat    = Math.round((cals * 0.25) / 9);
+    const carb   = Math.round((cals - (prot * 4 + fat * 9)) / 4);
+
+    document.getElementById("cal-info").textContent     = cals;
+    document.getElementById("protein-info").textContent = prot;
+    document.getElementById("fat-info").textContent     = fat;
+    document.getElementById("carb-info").textContent    = carb;
+
+    // meal & workout plans
+    const mealPlan = {
+      Breakfast: "Oats & Eggs",
+      Lunch:     "Chicken & Quinoa",
+      Snack:     "Yogurt & Nuts",
+      Dinner:    goal === "lose" ? "Salmon & Salad" : "Steak & Potato"
+    };
+    const workoutPlan = goal === "lose"
+      ? {Mon:"HIIT–30′",Tue:"Jog–45′",Wed:"Yoga",Thu:"Spin–40′",Fri:"Circuit",Sat:"Stretch",Sun:"Rest"}
+      : {Mon:"Chest & Tri",Tue:"Back & Bi",Wed:"Legs",Thu:"Shoulders",Fri:"Full-Body",Sat:"Cardio",Sun:"Rest"};
+
+    // fill overview table
+    const ovBody = document.getElementById("overview-body");
+    Object.entries(workoutPlan).forEach(([day, w]) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${day}</td><td>${w}</td>
+                      <td>${Object.keys(mealPlan).length} meals</td>`;
+      ovBody.appendChild(tr);
+    });
+
+    // tracker state
+    let tracker = JSON.parse(localStorage.getItem("plan_tracker") || "{}");
+    const days   = Object.keys(workoutPlan);
+    const grid   = document.getElementById("days-grid");
+
+    days.forEach(day => {
+      if (!tracker[day]) {
+        tracker[day] = { workout: false, meals: {} };
+        Object.keys(mealPlan).forEach(m => tracker[day].meals[m] = false);
+      }
+      const card = document.createElement("div");
+      card.className = "day-card";
+      card.innerHTML = `
+        <header>${day}</header>
+        <div class="day-body">
+          <p><strong>Workout:</strong> ${workoutPlan[day]}</p>
+          <label>
+            <input type="checkbox" class="workout-check" data-day="${day}"
+              ${tracker[day].workout ? "checked" : ""}/>
+            Done workout
+          </label>
+          <p><strong>Meals:</strong></p>
+          ${Object.entries(mealPlan).map(([meal, desc]) => `
+            <label>
+              <input type="checkbox" class="meal-check"
+                     data-day="${day}" data-meal="${meal}"
+                     ${tracker[day].meals[meal] ? "checked" : ""}/>
+              ${meal}: ${desc}
+            </label>
+          `).join("")}
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    const wkBtn = document.getElementById("complete-week");
+    const celeb = document.getElementById("celebrate");
+
+    function refreshProgress() {
+      const doneW = days.filter(d => tracker[d].workout).length;
+      document.getElementById("workout-count").textContent = doneW;
+      document.getElementById("week-progress").value = doneW;
+      // check all meals
+      const allMealsDone = days.every(d =>
+        Object.values(tracker[d].meals).every(v => v)
+      );
+      if (doneW === 7 && allMealsDone) {
+        wkBtn.classList.add("enabled");
+        wkBtn.disabled = false;
+      }
+    }
+    refreshProgress();
+
+    grid.addEventListener("change", e => {
+      const day = e.target.dataset.day;
+      if (e.target.classList.contains("workout-check")) {
+        tracker[day].workout = e.target.checked;
+      }
+      if (e.target.classList.contains("meal-check")) {
+        tracker[day].meals[e.target.dataset.meal] = e.target.checked;
+      }
+      localStorage.setItem("plan_tracker", JSON.stringify(tracker));
+      refreshProgress();
+    });
+
+    wkBtn.addEventListener("click", () => {
+      if (!wkBtn.classList.contains("enabled")) return;
+      // heavy confetti burst
+      confetti({ particleCount: 300, spread: 100, origin: { y: 0.4 } });
+      confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+      // show animated overlay
+      celeb.classList.add("visible");
+      setTimeout(() => celeb.classList.remove("visible"), 5000);
+    });
+  </script>
+</body>
+</html>

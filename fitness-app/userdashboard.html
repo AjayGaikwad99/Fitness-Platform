@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>User Dashboard | GoFit-999</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg,#e0eafc 0%,#cfdef3 100%);
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: #232a34;
+      color: #fff;
+      padding: 18px;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 10px rgba(44,62,80,0.09);
+    }
+
+    .container {
+      background: #fff;
+      max-width: 960px;
+      margin: 20px auto;
+      padding: 36px 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 28px rgba(44,62,80,0.13);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #232a34;
+      font-size: 1.8rem;
+    }
+
+    #errorMsg {
+      color: #e74c3c;
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 1rem;
+    }
+
+    .session-card {
+      background: #f8fafb;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .detail {
+      margin-bottom: 12px;
+      color: #4b4b4b;
+      flex: 1 1 100%;
+    }
+
+    .status {
+      font-weight: bold;
+      color: #232a34;
+      flex: 1 1 100%;
+    }
+
+    .btn-join {
+      padding: 8px 14px;
+      background: #2189ff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-join:hover {
+      background: #1a6fcc;
+    }
+
+    .btn-message {
+      padding: 8px 14px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+      margin-left: 8px;
+    }
+
+    .btn-message:hover {
+      background: #218838;
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        padding: 24px 16px;
+      }
+      .session-card {
+        flex-direction: column;
+      }
+      .btn-join,
+      .btn-message {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+  </style>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+  <div class="navbar">Your Dashboard</div>
+  <div class="container">
+    <h2>My Sessions</h2>
+    <div id="errorMsg"></div>
+    <div id="sessions"></div>
+  </div>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQwqNuIDSbaUfH_N6sy1fVZ1sZKHgbpwc",
+      authDomain: "gofit-999.firebaseapp.com",
+      projectId: "gofit-999",
+      storageBucket: "gofit-999.appspot.com",
+      messagingSenderId: "655870780801",
+      appId: "1:655870780801:web:292d28dbca3e6e00b9b480"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const list = document.getElementById('sessions');
+    const err = document.getElementById('errorMsg');
+
+    // On load: handle booking param & load sessions
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        return window.location.href = 'user.html';
+      }
+
+      // If trainerId param present, create a new appointment
+      const params = new URLSearchParams(location.search);
+      const trainerId = params.get('trainerId');
+      if (trainerId) {
+        const tdoc = await db.collection('trainers').doc(trainerId).get();
+        const t = tdoc.data();
+        await db.collection('appointments').add({
+          trainerId,
+          userId: user.uid,
+          userName: user.displayName || user.email.split('@')[0],
+          userEmail: user.email,
+          requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          status: 'pending',
+          trainerName: t.name,
+          rate: t.rate
+        });
+        history.replaceState(null, '', 'userdashboard.html');
+      }
+
+      loadSessions(user.uid);
+    });
+
+    // Real-time load of this user's sessions
+    function loadSessions(userId) {
+      db.collection('appointments')
+        .where('userId', '==', userId)
+        .orderBy('requestedAt', 'desc')
+        .onSnapshot(snap => {
+          list.innerHTML = '';
+          if (snap.empty) {
+            list.innerHTML = '<p style="text-align:center;">No sessions booked yet.</p>';
+            return;
+          }
+          snap.forEach(doc => renderSession(doc.id, doc.data()));
+        }, e => {
+          err.textContent = e.message;
+        });
+    }
+
+    // Render each session card with Join & Message buttons
+    function renderSession(id, d) {
+      const c = document.createElement('div');
+      c.className = 'session-card';
+
+      c.innerHTML = `
+        <div class="detail"><strong>Trainer:</strong> ${d.trainerName}</div>
+        <div class="detail"><strong>Requested:</strong> ${new Date(d.requestedAt.toDate()).toLocaleString()}</div>
+        <div class="detail status">${d.status.toUpperCase()}</div>
+      `;
+
+      // Always allow messaging
+      const msgBtn = document.createElement('button');
+      msgBtn.className = 'btn-message';
+      msgBtn.textContent = 'Message Trainer';
+      msgBtn.onclick = () => {
+        window.location.href = `user-message.html?trainerId=${d.trainerId}`;
+      };
+      c.appendChild(msgBtn);
+
+      // Scheduled: show time + Join button
+      if (d.status === 'scheduled') {
+        const when = document.createElement('div');
+        when.className = 'detail';
+        when.innerHTML = `<strong>When:</strong> ${new Date(d.scheduledAt.toDate()).toLocaleString()}`;
+        c.appendChild(when);
+
+        const joinBtn = document.createElement('button');
+        joinBtn.className = 'btn-join';
+        joinBtn.textContent = 'Join Live Coaching';
+        joinBtn.onclick = () => window.open(d.liveUrl, '_blank');
+        c.appendChild(joinBtn);
+
+      } else if (d.status === 'pending') {
+        const pending = document.createElement('div');
+        pending.className = 'detail';
+        pending.textContent = 'Waiting for trainer to schedule.';
+        c.appendChild(pending);
+
+      } else if (d.status === 'declined') {
+        const declined = document.createElement('div');
+        declined.className = 'detail';
+        declined.textContent = 'Your request was declined.';
+        c.appendChild(declined);
+      }
+
+      list.appendChild(c);
+    }
+  </script>
+</body>
+</html>

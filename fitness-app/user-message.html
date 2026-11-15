@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Two-Column Chat with Trainer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #eef2f5;
+    }
+
+    .navbar {
+      background: #232a34;
+      color: #fff;
+      padding: 16px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* two equal columns */
+      gap: 8px 0;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      line-height: 1.4;
+    }
+
+    .received {
+      grid-column: 1;
+      justify-self: start;
+      background: #f1f0f0;
+      color: #333;
+      border-bottom-left-radius: 2px;
+    }
+
+    .sent {
+      grid-column: 2;
+      justify-self: end;
+      background: #2189ff;
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .input-bar {
+      display: flex;
+      padding: 12px;
+      background: #fff;
+      border-top: 1px solid #ccc;
+    }
+
+    .input-bar input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .input-bar button {
+      margin-left: 8px;
+      padding: 10px 16px;
+      font-size: 1rem;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .input-bar button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar" id="chatTitle">Loading chat…</div>
+
+  <div class="chat-container" id="messages"></div>
+
+  <div class="input-bar">
+    <input id="msgInput" placeholder="Type your message…" />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    // 1. Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQwqNuIDSbaUfH_N6sy1fVZ1sZKHgbpwc",
+      authDomain: "gofit-999.firebaseapp.com",
+      projectId: "gofit-999",
+      storageBucket: "gofit-999.appspot.com",
+      messagingSenderId: "655870780801",
+      appId: "1:655870780801:web:292d28dbca3e6e00b9b480"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        return location.href = 'user.html';
+      }
+
+      const meUid = user.uid;
+
+      // 2. Get trainerId from URL
+      const params     = new URLSearchParams(location.search);
+      const trainerUid = params.get('trainerId');
+      if (!trainerUid) {
+        alert('No trainer specified.');
+        return history.back();
+      }
+
+      // 3. Fetch trainer’s name
+      const tdoc = await db.collection('trainers').doc(trainerUid).get();
+      const trainerName = tdoc.exists && tdoc.data().name
+        ? tdoc.data().name
+        : 'Trainer';
+      document.getElementById('chatTitle').textContent = `Chat with ${trainerName}`;
+
+      // 4. Compute a consistent chatId
+      const sortedIds = [meUid, trainerUid].sort();
+      const chatId    = `${sortedIds[0]}_${sortedIds[1]}`;
+
+      // 5. Ensure chat document exists
+      const chatRef = db.collection('chats').doc(chatId);
+      await chatRef.set({
+        participants: [meUid, trainerUid],
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      // 6. Real-time messages listener
+      chatRef
+        .collection('messages')
+        .orderBy('sentAt')
+        .onSnapshot(snap => {
+          const container = document.getElementById('messages');
+          container.innerHTML = '';
+          snap.forEach(doc => {
+            const m    = doc.data();
+            const side = m.senderId === meUid ? 'sent' : 'received';
+            const ts   = m.sentAt
+              ? m.sentAt.toDate().toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '';
+            container.innerHTML += `
+              <div class="message ${side}">
+                ${m.text}
+                <div class="timestamp">${ts}</div>
+              </div>`;
+          });
+          container.scrollTop = container.scrollHeight;
+        });
+
+      // 7. Send new message
+      document.getElementById('sendBtn').onclick = async () => {
+        const input = document.getElementById('msgInput');
+        const text  = input.value.trim();
+        if (!text) return;
+
+        await chatRef.collection('messages').add({
+          senderId: meUid,
+          senderName: user.displayName || user.email.split('@')[0],
+          text,
+          sentAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        input.value = '';
+        await chatRef.update({
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      };
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Your Diet & Exercise Plan</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      padding: 2rem;
+    }
+    .card {
+      background: #222;
+      padding: 1.5rem;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .section-title {
+      margin-top: 1.2rem;
+      margin-bottom: 0.6rem;
+      font-size: 1.1rem;
+      text-decoration: underline;
+    }
+    ul {
+      margin-left: 1.2rem;
+    }
+    li {
+      margin-bottom: 0.4rem;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      color: #ff8a33;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Your Personalized Plan</h2>
+    <div id="plan-summary"></div>
+    <a href="viewfullplan.html" class="back-link">View Full Plan</a>
+  </div>
+
+  <script>
+    const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const container = document.getElementById('plan-summary');
+
+    if (!profile.name) {
+      container.innerHTML = `
+        <p>No profile found. Please <a href="profile.html">create your profile</a> first.</p>
+      `;
+    } else {
+      // display profile summary
+      container.innerHTML = `
+        <p><strong>Name:</strong> ${profile.name}</p>
+        <p><strong>Age:</strong> ${profile.age}</p>
+        <p><strong>Weight:</strong> ${profile.weight} kg</p>
+        <p><strong>Height:</strong> ${profile.height} cm</p>
+        <p><strong>Goal:</strong> ${
+          { lose: 'Lose Weight', maintain: 'Maintain', gain: 'Gain Muscle' }[profile.goal]
+        }</p>
+      `;
+
+      // choose plan
+      let dietItems = [], exerciseItems = [];
+      if (profile.goal === 'lose') {
+        dietItems = [
+          'Breakfast: Smoothie with spinach, banana, protein powder',
+          'Lunch: Turkey wrap with veggies',
+          'Snack: Carrot sticks & hummus',
+          'Dinner: Baked cod with steamed broccoli'
+        ];
+        exerciseItems = [
+          'Mon: 30m HIIT',
+          'Tue: Strength (Full Body, 3×12)',
+          'Wed: 45m Brisk Walk',
+          'Thu: Strength (Legs & Core)',
+          'Fri: 30m Cycling',
+          'Sat: Yoga/Stretching',
+          'Sun: Rest'
+        ];
+      } else if (profile.goal === 'gain') {
+        dietItems = [
+          'Breakfast: Oatmeal, eggs & avocado',
+          'Lunch: Chicken breast, rice & greens',
+          'Snack: Greek yogurt & nuts',
+          'Dinner: Steak, sweet potato & asparagus'
+        ];
+        exerciseItems = [
+          'Mon: Chest & Triceps',
+          'Tue: Back & Biceps',
+          'Wed: Rest or Light Cardio',
+          'Thu: Legs & Shoulders',
+          'Fri: Full Body Compound',
+          'Sat: Active Recovery',
+          'Sun: Rest'
+        ];
+      } else { // maintain
+        dietItems = [
+          'Breakfast: Greek yogurt & fruit',
+          'Lunch: Quinoa salad with beans',
+          'Snack: Apple & peanut butter',
+          'Dinner: Salmon, brown rice & veggies'
+        ];
+        exerciseItems = [
+          'Mon: Circuit Training',
+          'Tue: Jog (30m)',
+          'Wed: Strength (Upper Body)',
+          'Thu: Pilates/Yoga',
+          'Fri: Strength (Lower Body)',
+          'Sat: Group Sport / Activity',
+          'Sun: Rest'
+        ];
+      }
+
+      // render lists
+      container.insertAdjacentHTML('beforeend', `
+        <div class="section-title">Diet Plan</div>
+        <ul>${dietItems.map(i => `<li>${i}</li>`).join('')}</ul>
+        <div class="section-title">Exercise Plan</div>
+        <ul>${exerciseItems.map(i => `<li>${i}</li>`).join('')}</ul>
+      `);
+    }
+  </script>
+</body>
+</html>

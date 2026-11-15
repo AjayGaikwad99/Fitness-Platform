@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Profile</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #222;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 420px;
+    }
+    h2 { margin-bottom: 1rem; text-align: center; }
+    label { display: block; margin-top: 1rem; font-size: 0.9rem; }
+    .hint { font-size: 0.8rem; color: #aaa; margin-top: 0.25rem; }
+    .error { color: #ffb3a7; font-size: 0.85rem; margin-top: 0.25rem; display: none; }
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border: none;
+      border-radius: 4px;
+      background: #333;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.8rem;
+      background: #ff6a00;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 700;
+      transition: background 0.3s;
+    }
+    button:hover { background: #ff8a33; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Edit Your Profile</h2>
+    <form id="profileForm" novalidate>
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="age">Age <span class="hint">10 – 100 years</span></label>
+      <input type="number" id="age" name="age" required min="10" max="100" />
+      <div id="ageError" class="error">Age must be between 10 and 100.</div>
+
+      <label for="weight">Weight (kg) <span class="hint">30 – 200 kg</span></label>
+      <input type="number" id="weight" name="weight" required min="30" max="200" step="0.1" />
+      <div id="weightError" class="error">Weight must be between 30 kg and 200 kg.</div>
+
+      <label for="height">Height (cm) <span class="hint">100 – 250 cm</span></label>
+      <input type="number" id="height" name="height" required min="100" max="250" step="0.1" />
+      <div id="heightError" class="error">Height must be between 100 cm and 250 cm.</div>
+
+      <label for="goal">Fitness Goal</label>
+      <select id="goal" name="goal" required>
+        <option value="">Select a goal</option>
+        <option value="lose">Lose Weight</option>
+        <option value="maintain">Maintain Weight</option>
+        <option value="gain">Gain Muscle</option>
+      </select>
+
+      <button type="submit">Save Profile</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('profileForm');
+    const ageInput = document.getElementById('age');
+    const weightInput = document.getElementById('weight');
+    const heightInput = document.getElementById('height');
+    const ageError = document.getElementById('ageError');
+    const weightError = document.getElementById('weightError');
+    const heightError = document.getElementById('heightError');
+
+    const LIMITS = {
+      age: { min: 10, max: 100 },
+      weight: { min: 30, max: 200 },
+      height: { min: 100, max: 250 }
+    };
+
+    // Load stored profile
+    const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (stored.name) {
+      form.name.value   = stored.name;
+      ageInput.value    = stored.age;
+      weightInput.value = stored.weight;
+      heightInput.value = stored.height;
+      form.goal.value   = stored.goal;
+    }
+
+    // Live validation helper
+    function validateNumberInput(input, limits, errorEl) {
+      const val = input.value === '' ? NaN : Number(input.value);
+      if (Number.isNaN(val)) {
+        errorEl.style.display = 'none';
+        input.setCustomValidity('');
+        return true;
+      }
+      if (val < limits.min || val > limits.max) {
+        errorEl.style.display = 'block';
+        input.setCustomValidity('out-of-range');
+        return false;
+      } else {
+        errorEl.style.display = 'none';
+        input.setCustomValidity('');
+        return true;
+      }
+    }
+
+    ageInput.addEventListener('input', () => validateNumberInput(ageInput, LIMITS.age, ageError));
+    weightInput.addEventListener('input', () => validateNumberInput(weightInput, LIMITS.weight, weightError));
+    heightInput.addEventListener('input', () => validateNumberInput(heightInput, LIMITS.height, heightError));
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      // Trim name
+      const name = form.name.value.trim();
+      if (!name) {
+        alert('Please enter your name.');
+        return;
+      }
+
+      const ageOk = validateNumberInput(ageInput, LIMITS.age, ageError);
+      const weightOk = validateNumberInput(weightInput, LIMITS.weight, weightError);
+      const heightOk = validateNumberInput(heightInput, LIMITS.height, heightError);
+
+      if (!ageOk || !weightOk || !heightOk) {
+        // focus first invalid field
+        if (!ageOk) ageInput.focus();
+        else if (!weightOk) weightInput.focus();
+        else heightInput.focus();
+        return;
+      }
+
+      const data = {
+        name,
+        age: Number(ageInput.value),
+        weight: Number(weightInput.value),
+        height: Number(heightInput.value),
+        goal: form.goal.value
+      };
+
+      localStorage.setItem('userProfile', JSON.stringify(data));
+      alert('Profile edited successfully!');
+      window.location.href = 'diet.html';
+    });
+  </script>
+</body>
+</html>
